@@ -59,3 +59,32 @@ export const register = async (req, res, next) => {
     });
   }
 };
+
+export const verifyEmail = async (req, res, next) => {
+  try {
+    let tokenString = req.headers.authorization;
+    let tokenArray = tokenString.split(" ");
+    let token = tokenArray[1];
+    // console.log(token);
+
+    //id, iat, exp
+    let user = await jwt.verify(token, secretKey);
+    console.log(user);
+
+    let result = await webUser.findByIdAndUpdate(
+      user._id,
+      { isVerifiedEmail: true },
+      { new: true }
+    );
+    res.status(200).json({
+      success: true,
+      message: "message verified true",
+      result: result,
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
