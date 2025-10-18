@@ -88,3 +88,48 @@ export const verifyEmail = async (req, res, next) => {
     });
   }
 };
+
+export const Login = async (req, res, next) => {
+  try {
+    let email = req.body.email;
+    console.log(email);
+    let password = req.body.password;
+    let user = await webUser.findOne({ email: email });
+    // console.log(user);
+    if (!user) {
+      throw new Error("User Not Found");
+    }
+
+    if (!user.isVerifiedEmail) {
+      throw new Error("Email not verified");
+    }
+
+    let isValidPassword = await bcrypt.compare(password, user.password);
+
+    if (!isValidPassword) {
+      throw new Error("Invalid Credentials");
+    }
+
+    let infoObj = {
+      _id: user._id,
+    };
+
+    let expiryInfo = {
+      expiresIn: "365d",
+    };
+
+    let token = await jwt.sign(infoObj, secretKey, expiryInfo);
+
+    res.status(200).json({
+      success: true,
+      message: "web User loged in successfully",
+      result: user,
+      token: token,
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
