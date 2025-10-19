@@ -2,11 +2,15 @@ import express from "express";
 import connectDB from "./src/connectDB/connectDB.js";
 import webUserRouter from "./src/route/webUserRouter.js";
 import cors from "cors";
-
+import memberRoute from "./src/route/memberRouter.js";
+import path from "path";
 const app = express();
 const port = 4000;
 
 app.use(express.json());
+
+app.use("/uploads", express.static("uploads"));
+
 app.use(cors());
 
 connectDB();
@@ -16,3 +20,4 @@ app.listen(port, () => {
 });
 
 app.use("/webUser", webUserRouter);
+app.use("/member", memberRoute);
