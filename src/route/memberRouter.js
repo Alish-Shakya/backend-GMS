@@ -1,7 +1,11 @@
 // routes/memberRoute.js
 import express from "express";
 import multer from "multer";
-import { createMember } from "../controller/memberController.js";
+import {
+  createMember,
+  expiringMembers,
+  readAllMembers,
+} from "../controller/memberController.js";
 
 const memberRoute = express.Router();
 
@@ -17,7 +21,12 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// 🧠 Route with multer middleware
+// ✅ Create new member
 memberRoute.post("/add-member", upload.single("photo"), createMember);
+
+// ✅ Fetch all members
+memberRoute.get("/all-members", readAllMembers);
+
+memberRoute.get("/all-members", expiringMembers);
 
 export default memberRoute;
