@@ -11,9 +11,12 @@ export const register = async (req, res, next) => {
 
     let hashedPassword = await bcrypt.hash(password, 10);
 
+    let photoPath = req.file ? `/uploads/${req.file.filename}` : "";
+
     data = {
       ...data,
       password: hashedPassword,
+      photo: photoPath,
       isVerifiedEmail: false,
       role: "user",
     };

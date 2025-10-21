@@ -4,10 +4,11 @@ import {
   register,
   verifyEmail,
 } from "../controller/webUserController.js";
+import upload from "../middleware/upload.js";
 
 const webUserRouter = Router();
 
-webUserRouter.route("/register").post(register);
+webUserRouter.route("/register").post(upload.single("photo"), register);
 
 webUserRouter.route("/verifyEmail").post(verifyEmail);
 

@@ -42,31 +42,4 @@ export const readAllMembers = async (req, res, next) => {
   }
 };
 
-// 📅 Get Members Expiring in Next 7 Days
-export const expiringMembers = async (req, res) => {
-  try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // start of today
-
-    // one month from now
-    const nextMonth = new Date();
-    nextMonth.setMonth(nextMonth.getMonth() + 1);
-
-    // find members whose membership ends within next month
-    const expiringMembers = await Member.find({
-      endDate: { $lte: nextMonth, $gte: today },
-    });
-
-    res.status(200).json({
-      success: true,
-      message: "Members expiring within the next month",
-      count: expiringMembers.length,
-      data: expiringMembers,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
+export const expiringMembers = async (req, res, next) => {};

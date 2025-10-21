@@ -4,6 +4,7 @@ const webUserSchema = new mongoose.Schema({
   userName: {
     type: String,
     required: true,
+    unique: true,
   },
 
   email: {
@@ -20,6 +21,11 @@ const webUserSchema = new mongoose.Schema({
   contactNo: {
     type: Number,
     required: true,
+  },
+
+  photo: {
+    type: String,
+    required: false,
   },
 
   isVerifiedEmail: {
