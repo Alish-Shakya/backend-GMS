@@ -54,6 +54,12 @@ export const register = async (req, res, next) => {
       message: "Web user Registered Successfully",
       result: result,
       token: token,
+      user: {
+        _id: user._id,
+        userName: user.userName,
+        email: user.email,
+        photo: user.photo,
+      },
     });
   } catch (error) {
     res.status(400).json({
@@ -134,5 +140,21 @@ export const Login = async (req, res, next) => {
       success: false,
       message: error.message,
     });
+  }
+};
+
+export const myProfile = async (req, res, next) => {
+  try {
+    let id = req._id;
+    let result = await webUser.findById(id);
+
+    res.status(200).json({
+      success: true,
+      message: "read profile successfully",
+      result: result,
+    });
+  } catch (error) {
+    success: false;
+    message: error.message;
   }
 };
