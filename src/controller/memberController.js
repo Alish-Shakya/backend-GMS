@@ -42,4 +42,33 @@ export const readAllMembers = async (req, res, next) => {
   }
 };
 
-export const expiringMembers = async (req, res, next) => {};
+export const getNewMembers = async (req, res) => {
+  try {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(
+      now.getFullYear(),
+      now.getMonth() + 1,
+      0,
+      23,
+      59,
+      59
+    );
+
+    const newMembers = await member.find({
+      startDate: { $gte: startOfMonth, $lte: endOfMonth },
+    });
+
+    res.status(200).json({
+      success: true,
+      count: newMembers.length,
+      data: newMembers,
+    });
+  } catch (error) {
+    console.error("Error fetching new members:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error fetching new members",
+    });
+  }
+};

@@ -153,6 +153,8 @@ export const myProfile = async (req, res, next) => {
       message: "read profile successfully",
       result: result,
     });
+    // console.log(id);
+    // console.log(result);
   } catch (error) {
     success: false;
     message: error.message;
