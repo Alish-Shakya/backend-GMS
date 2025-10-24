@@ -54,12 +54,6 @@ export const register = async (req, res, next) => {
       message: "Web user Registered Successfully",
       result: result,
       token: token,
-      user: {
-        _id: user._id,
-        userName: user.userName,
-        email: user.email,
-        photo: user.photo,
-      },
     });
   } catch (error) {
     res.status(400).json({
