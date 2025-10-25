@@ -28,6 +28,14 @@ const webUserSchema = new mongoose.Schema({
     required: false,
   },
 
+  otp: {
+    type: String,
+  },
+
+  otpExpires: {
+    type: Date,
+  },
+
   isVerifiedEmail: {
     type: Boolean,
     required: true,

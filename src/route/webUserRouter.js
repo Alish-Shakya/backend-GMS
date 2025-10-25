@@ -3,7 +3,8 @@ import {
   Login,
   myProfile,
   register,
-  verifyEmail,
+  // verifyEmail,
+  verifyOTP,
 } from "../controller/webUserController.js";
 import upload from "../middleware/upload.js";
 import { isAuthenticated } from "../middleware/Authenticated.js";
@@ -12,7 +13,8 @@ const webUserRouter = Router();
 
 webUserRouter.route("/register").post(upload.single("photo"), register);
 
-webUserRouter.route("/verifyEmail").post(verifyEmail);
+// webUserRouter.route("/verifyEmail").post(verifyEmail);
+webUserRouter.post("/verify-otp", verifyOTP);
 
 webUserRouter.route("/login").post(Login);
 
