@@ -72,3 +72,68 @@ export const getNewMembers = async (req, res) => {
     });
   }
 };
+
+//expiring within one week
+// export const getExpiringMembers = async (req, res) => {
+//   try {
+//     const today = new Date();
+//     const oneWeekLater = new Date(today);
+//     oneWeekLater.setDate(today.getDate() + 7); // add 7 days
+
+//     // Find members whose membership ends within the next 7 days
+//     const expiringMembers = await member
+//       .find({
+//         endDate: {
+//           $gte: today, // endDate is today or later
+//           $lte: oneWeekLater, // but within 7 days
+//         },
+//       })
+//       .sort({ endDate: 1 });
+
+//     res.status(200).json({
+//       success: true,
+//       count: expiringMembers.length,
+//       data: expiringMembers,
+//     });
+//   } catch (error) {
+//     console.error("Error fetching expiring members:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Server Error",
+//     });
+//   }
+// };
+
+// expiring within one month
+export const getExpiringMembers = async (req, res) => {
+  try {
+    const today = new Date();
+    const oneMonthLater = new Date(today);
+    oneMonthLater.setMonth(oneMonthLater.getMonth() + 1); // add 1 month
+
+    console.log("Today:", today);
+    console.log("One month later:", oneMonthLater);
+
+    // Find members whose membership ends within the next 1 month
+    const expiringMembers = await member
+      .find({
+        endDate: {
+          $gte: today, // endDate is today or later
+          $lte: oneMonthLater, // and within 1 month
+        },
+      })
+      .sort({ endDate: 1 }); // sort by soonest expiring first
+
+    res.status(200).json({
+      success: true,
+      count: expiringMembers.length,
+      data: expiringMembers,
+    });
+  } catch (error) {
+    console.error("Error fetching expiring members:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
+  }
+};

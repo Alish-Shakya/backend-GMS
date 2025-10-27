@@ -3,6 +3,7 @@ import express from "express";
 import multer from "multer";
 import {
   createMember,
+  getExpiringMembers,
   getNewMembers,
   readAllMembers,
 } from "../controller/memberController.js";
@@ -28,5 +29,7 @@ memberRoute.post("/add-member", upload.single("photo"), createMember);
 memberRoute.get("/all-members", readAllMembers);
 
 memberRoute.get("/new-member", getNewMembers);
+
+memberRoute.get("/expiring-members", getExpiringMembers);
 
 export default memberRoute;
