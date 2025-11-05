@@ -104,7 +104,7 @@ export const getNewMembers = async (req, res) => {
 //   }
 // };
 
-// expiring within one month
+// expiring within one month  
 export const getExpiringMembers = async (req, res) => {
   try {
     const today = new Date();

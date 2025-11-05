@@ -189,3 +189,48 @@ export const myProfile = async (req, res, next) => {
     message: error.message;
   }
 };
+
+export const forgotPassword = async (req, res, next) => {
+  try {
+    let email = req.body.email;
+
+    let user = await webUser.findOne({ email: email });
+
+    if (user) {
+      let infoObj = {
+        _id: user._id,
+      };
+      let expiryInfo = {
+        expiresIn: "1h",
+      };
+
+      let token = await jwt.sign(infoObj, secretKey, expiryInfo);
+
+      await sendEmail({
+        to: user.email,
+        subject: "Reset Password",
+        html: `
+        <h1> Password Reset</h1>
+        <p> Click this link to reset your password </p>
+        <a href="http://localhost:5173/reset-password?token=${token}">
+        http://localhost:5173/reset-password?token=${token}
+       </a>
+
+        `,
+      });
+
+      res.status(200).json({
+        success: true,
+        message: "Password link has been sent to your email",
+        result: user,
+      });
+    } else {
+      console.log("User not found");
+    }
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
