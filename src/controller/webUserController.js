@@ -157,6 +157,7 @@ export const Login = async (req, res, next) => {
     };
 
     let token = await jwt.sign(infoObj, secretKey, expiryInfo);
+    // console.log(token);
 
     res.status(200).json({
       success: true,
