@@ -1,8 +1,10 @@
 import { Router } from "express";
 import {
+  forgotPassword,
   Login,
   myProfile,
   register,
+  resetPassword,
   // verifyEmail,
   verifyOTP,
 } from "../controller/webUserController.js";
@@ -19,5 +21,9 @@ webUserRouter.post("/verify-otp", verifyOTP);
 webUserRouter.route("/login").post(Login);
 
 webUserRouter.route("/myProfile").get(isAuthenticated, myProfile);
+
+webUserRouter.route("/forgot-password").post(forgotPassword);
+
+webUserRouter.route("/reset-password").patch(isAuthenticated, resetPassword);
 
 export default webUserRouter;

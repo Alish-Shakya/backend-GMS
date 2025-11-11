@@ -157,7 +157,6 @@ export const Login = async (req, res, next) => {
     };
 
     let token = await jwt.sign(infoObj, secretKey, expiryInfo);
-    // console.log(token);
 
     res.status(200).json({
       success: true,
@@ -228,6 +227,29 @@ export const forgotPassword = async (req, res, next) => {
     } else {
       console.log("User not found");
     }
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const resetPassword = async (req, res, next) => {
+  try {
+    let password = req.body.password;
+    let hashpassword = await bcrypt.hash(password, 10);
+
+    let result = await webUser.findByIdAndUpdate(
+      req._id,
+      { password: hashpassword },
+      { new: true }
+    );
+    res.status(200).json({
+      success: true,
+      message: "password reset successfully",
+      result: result,
+    });
   } catch (error) {
     res.status(400).json({
       success: false,
