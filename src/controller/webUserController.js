@@ -3,6 +3,7 @@ import { webUser } from "../model/model.js";
 import { secretKey } from "../utils/constant.js";
 import jwt from "jsonwebtoken";
 import { sendEmail } from "../utils/sendEmail.js";
+import crypto from "crypto";
 
 export const register = async (req, res, next) => {
   try {
@@ -129,45 +130,49 @@ export const verifyOTP = async (req, res, next) => {
 
 export const Login = async (req, res, next) => {
   try {
-    let email = req.body.email;
-    console.log(email);
-    let password = req.body.password;
-    let user = await webUser.findOne({ email: email });
-    // console.log(user);
+    const { email, password } = req.body;
+
+    // 1️⃣ Check if email exists
+    const user = await webUser.findOne({ email });
     if (!user) {
-      throw new Error("User Not Found");
+      return res.status(404).json({
+        success: false,
+        message:
+          "This account has not been registered. Please register to continue.",
+      });
     }
 
+    // 2️⃣ Check if email is verified
     if (!user.isVerifiedEmail) {
-      throw new Error("Email not verified");
+      return res.status(403).json({
+        success: false,
+        message: "Please verify your email before logging in.",
+      });
     }
 
-    let isValidPassword = await bcrypt.compare(password, user.password);
-
+    // 3️⃣ Check if password is valid
+    const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
-      throw new Error("Invalid Credentials");
+      return res.status(401).json({
+        success: false,
+        message: "Invalid password. Please try again.",
+      });
     }
 
-    let infoObj = {
-      _id: user._id,
-    };
-
-    let expiryInfo = {
-      expiresIn: "365d",
-    };
-
-    let token = await jwt.sign(infoObj, secretKey, expiryInfo);
+    // 4️⃣ Generate token
+    const token = jwt.sign({ _id: user._id }, secretKey, { expiresIn: "365d" });
 
     res.status(200).json({
       success: true,
-      message: "web User loged in successfully",
+      message: "User logged in successfully.",
       result: user,
-      token: token,
+      token,
     });
   } catch (error) {
-    res.status(400).json({
+    console.error(error);
+    res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Something went wrong. Please try again later.",
     });
   }
 };
@@ -190,65 +195,191 @@ export const myProfile = async (req, res, next) => {
   }
 };
 
-export const forgotPassword = async (req, res, next) => {
+// export const forgotPassword = async (req, res, next) => {
+//   try {
+//     let email = req.body.email;
+
+//     let user = await webUser.findOne({ email: email });
+
+//     if (user) {
+//       let infoObj = {
+//         _id: user._id,
+//       };
+//       let expiryInfo = {
+//         expiresIn: "1h",
+//       };
+
+//       let token = await jwt.sign(infoObj, secretKey, expiryInfo);
+
+//       await sendEmail({
+//         to: user.email,
+//         subject: "Reset Password",
+//         html: `
+//         <h1> Password Reset</h1>
+//         <p> Click this link to reset your password </p>
+//         <a href="http://localhost:5173/reset-password?token=${token}">
+//         http://localhost:5173/reset-password?token=${token}
+//        </a>
+
+//         `,
+//       });
+
+//       res.status(200).json({
+//         success: true,
+//         message: "Password link has been sent to your email",
+//         result: user,
+//       });
+//     } else {
+//       console.log("User not found");
+//     }
+//   } catch (error) {
+//     res.status(400).json({
+//       success: false,
+//       message: error.message,
+//     });
+//   }
+// };
+
+// export const resetPassword = async (req, res, next) => {
+//   try {
+//     let password = req.body.password;
+//     let hashpassword = await bcrypt.hash(password, 10);
+
+//     let result = await webUser.findByIdAndUpdate(
+//       req._id,
+//       { password: hashpassword },
+//       { new: true }
+//     );
+//     res.status(200).json({
+//       success: true,
+//       message: "password reset successfully",
+//       result: result,
+//     });
+//   } catch (error) {
+//     res.status(400).json({
+//       success: false,
+//       message: error.message,
+//     });
+//   }
+// };
+
+// ✅ Step 1: Forgot Password
+export const forgotPassword = async (req, res) => {
   try {
-    let email = req.body.email;
+    const { email } = req.body;
+    const user = await webUser.findOne({ email });
 
-    let user = await webUser.findOne({ email: email });
-
-    if (user) {
-      let infoObj = {
-        _id: user._id,
-      };
-      let expiryInfo = {
-        expiresIn: "1h",
-      };
-
-      let token = await jwt.sign(infoObj, secretKey, expiryInfo);
-
-      await sendEmail({
-        to: user.email,
-        subject: "Reset Password",
-        html: `
-        <h1> Password Reset</h1>
-        <p> Click this link to reset your password </p>
-        <a href="http://localhost:5173/reset-password?token=${token}">
-        http://localhost:5173/reset-password?token=${token}
-       </a>
-
-        `,
-      });
-
-      res.status(200).json({
+    if (!user) {
+      return res.status(200).json({
         success: true,
-        message: "Password link has been sent to your email",
-        result: user,
+        message: "If this email exists, a reset code has been sent.",
       });
-    } else {
-      console.log("User not found");
     }
+
+    // Generate random 6-digit code
+    const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Use existing otp fields instead of creating new ones
+    user.otp = resetCode;
+    user.otpExpires = Date.now() + 10 * 60 * 1000; // 10 mins
+    await user.save();
+
+    // Send email
+    await sendEmail({
+      to: user.email,
+      subject: "Your Password Reset Code",
+      html: `
+        <h2>Password Reset Verification</h2>
+        <p>Your 6-digit reset code is:</p>
+        <h1>${resetCode}</h1>
+        <p>This code will expire in 10 minutes.</p>
+      `,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Reset code sent to your email.",
+    });
   } catch (error) {
-    res.status(400).json({
+    res.status(500).json({
       success: false,
       message: error.message,
     });
   }
 };
 
-export const resetPassword = async (req, res, next) => {
+// ✅ Step 2: Verify Code
+export const verifyCodeReset = async (req, res) => {
   try {
-    let password = req.body.password;
-    let hashpassword = await bcrypt.hash(password, 10);
+    const { email, code } = req.body;
 
-    let result = await webUser.findByIdAndUpdate(
-      req._id,
-      { password: hashpassword },
-      { new: true }
-    );
+    console.log("🔍 Incoming verify request:", { email, code });
+
+    const user = await webUser.findOne({ email });
+    console.log("📦 User record:", {
+      otp: user?.otp,
+      otpExpires: user?.otpExpires,
+      now: Date.now(),
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid email or code",
+      });
+    }
+
+    // Check code and expiry
+    if (!user.otp || user.otpExpires < Date.now() || user.otp !== code) {
+      console.log("❌ Code expired or missing");
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired code",
+      });
+    }
+
+    // Clear after success
+    user.otp = undefined;
+    user.otpExpires = undefined;
+    await user.save();
+
     res.status(200).json({
       success: true,
-      message: "password reset successfully",
-      result: result,
+      message: "Code verified successfully. You can now reset your password.",
+    });
+  } catch (error) {
+    console.log("❌ Verify error:", error.message);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// ✅ Step 3: Reset Password
+export const resetPassword = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const user = await webUser.findOne({ email });
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    const hashPassword = await bcrypt.hash(password, 10);
+    user.password = hashPassword;
+
+    // Optional cleanup
+    user.otp = undefined;
+    user.otpExpires = undefined;
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Password reset successfully.",
     });
   } catch (error) {
     res.status(400).json({

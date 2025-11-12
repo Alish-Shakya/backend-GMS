@@ -5,6 +5,7 @@ import {
   myProfile,
   register,
   resetPassword,
+  verifyCodeReset,
   // verifyEmail,
   verifyOTP,
 } from "../controller/webUserController.js";
@@ -24,6 +25,8 @@ webUserRouter.route("/myProfile").get(isAuthenticated, myProfile);
 
 webUserRouter.route("/forgot-password").post(forgotPassword);
 
-webUserRouter.route("/reset-password").patch(isAuthenticated, resetPassword);
+webUserRouter.route("/verify-code-reset").post(verifyCodeReset);
+
+webUserRouter.route("/reset-password").patch(resetPassword);
 
 export default webUserRouter;
