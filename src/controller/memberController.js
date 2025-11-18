@@ -104,7 +104,8 @@ export const getNewMembers = async (req, res) => {
 //   }
 // };
 
-// expiring within one month  
+// expiring within one month
+
 export const getExpiringMembers = async (req, res) => {
   try {
     const today = new Date();
@@ -134,6 +135,24 @@ export const getExpiringMembers = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Server Error",
+    });
+  }
+};
+
+export const revenue = async (req, res) => {
+  try {
+    const members = await member.find({});
+    const totalRevenue = members.reduce((sum, mem) => sum + mem.amountPaid, 0);
+
+    res.status(200).json({
+      success: true,
+      message: "Total Revenue",
+      data: totalRevenue,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
     });
   }
 };

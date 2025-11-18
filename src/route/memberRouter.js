@@ -6,6 +6,7 @@ import {
   getExpiringMembers,
   getNewMembers,
   readAllMembers,
+  revenue,
 } from "../controller/memberController.js";
 
 const memberRoute = express.Router();
@@ -31,5 +32,7 @@ memberRoute.get("/all-members", readAllMembers);
 memberRoute.get("/new-member", getNewMembers);
 
 memberRoute.get("/expiring-members", getExpiringMembers);
+
+memberRoute.get("/revenue", revenue);
 
 export default memberRoute;

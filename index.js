@@ -4,7 +4,7 @@ import webUserRouter from "./src/route/webUserRouter.js";
 import cors from "cors";
 import memberRoute from "./src/route/memberRouter.js";
 const app = express();
-const port = 4000;
+const port = 8000;
 
 app.use(express.json());
 
